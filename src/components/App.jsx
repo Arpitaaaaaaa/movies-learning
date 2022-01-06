@@ -15,7 +15,7 @@ const App = () => {
   const [startEdit, setStartEdit] = useState(false);
   const [id, setId] = useState();
 
-  const { register, formState: handleSubmit, reset } = useForm();
+  const { register, handleSubmit, reset } = useForm();
 
   const onSubmit = async (values) => {
     const res = await api.post("/", {
