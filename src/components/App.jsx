@@ -1,27 +1,21 @@
+import { FaTrashAlt } from "react-icons/fa";
+import { FiEdit } from "react-icons/fi";
 import axios from "axios";
-import { useEffect, useState } from "react";
+
 import { useForm } from "react-hook-form";
+
+import { useEffect, useState } from "react";
+
 import styled from "styled-components";
-import api from "../api";
+import api from "./api";
+import EditForm from "./EditForm";
 
 const App = () => {
   const [movies, setMovies] = useState([]);
+  const [startEdit, setStartEdit] = useState(false);
+  const [id, setId] = useState();
 
-  const {
-    register,
-    formState: { errors },
-    handleSubmit,
-    reset,
-  } = useForm();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const res = await api.get("/");
-      setMovies(res.data);
-    };
-
-    fetchData();
-  }, []);
+  const { register, formState: handleSubmit, reset } = useForm();
 
   const onSubmit = async (values) => {
     const res = await api.post("/", {
@@ -33,6 +27,45 @@ const App = () => {
     reset();
     console.log(res);
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await api.get("/");
+      setMovies(res.data);
+    };
+
+    fetchData();
+  }, []);
+
+  /* useEffect(() => {
+    // DELETE request using axios with async/await
+    async function deleteHandler() {
+        const res = await axios.delete(`http://localhost:4000/movies/${movies.id}`);
+        setMovies(res.data);
+    }
+
+    deleteHandler();
+}, []); */
+
+  const deleteItem = async (id) => {
+    const newMovies = [...movies];
+    await axios.delete(`http://localhost:4000/movies/${id}`);
+    setMovies(newMovies.filter((movis) => movis.id !== id));
+  };
+
+  const putHandler = async (id) => {
+    setStartEdit(true);
+    setId(id);
+  };
+
+  /* 
+  setItem((oldValues) => {
+      return oldValues.filter((arrElmnts, i) => {
+        return id !== i;
+      });
+ const deleteItem = (id) => {
+   console.log(id)
+ }; */
 
   return (
     <div>
@@ -68,15 +101,25 @@ const App = () => {
         </label>
         <button>Create Movie</button>
       </StyledForm>
+
       <StyledHeading>Movies</StyledHeading>
       <StyledContainer>
         {movies.map((movie) => (
           <StyledCard key={movie.id}>
             <h4>{movie.title}</h4>
             <p>Popularity: {movie.popularity}</p>
+
+            <button onClick={() => putHandler(movie.id)}>
+              <FiEdit />
+            </button>
+            <button onClick={() => deleteItem(movie.id)}>
+              {" "}
+              <FaTrashAlt />
+            </button>
           </StyledCard>
         ))}
       </StyledContainer>
+      {startEdit && <EditForm id={id} movies={movies} setMovies={setMovies} />}
     </div>
   );
 };
@@ -93,7 +136,7 @@ const StyledContainer = styled.div`
 
 const StyledCard = styled.div`
   padding: 2rem;
-  background-color: whitesmoke;
+  background-color: #cddee4;
   margin: 1rem;
   border-radius: 10px;
 
@@ -103,6 +146,15 @@ const StyledCard = styled.div`
 
   p {
     font-size: 1rem;
+  }
+
+  button {
+    margin-right: 1rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    color: red;
+    border: 2px solid black;
+    cursor: pointer;
   }
 `;
 
